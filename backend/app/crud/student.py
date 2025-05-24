@@ -6,6 +6,7 @@ from pydantic import ValidationError
 from fastapi import HTTPException, status
 from app.scripts.scripts import extract_students_data
 from io import BytesIO
+from  app.schemas.student import StudentUpdate
 
 def get_student_by_usn(session:Session, usn:str)-> Optional[StudentInDB]:
     return session.exec(select(StudentInDB).where(StudentInDB.usn==usn)).first()
@@ -24,19 +25,17 @@ def create_student(session:Session, student:StudentInDB):
             session.refresh(student)
             return student.usn
 
-def create_student_file(session:Session, buffer:BytesIO):
+def create_student_file(session:Session, buffer:BytesIO)->dict:
     dict_data=extract_students_data(buffer=buffer)
     added=""
     for row in dict_data:
         try:
             existing=session.exec(select(StudentInDB).where(StudentInDB.usn==row["usn"])).first()
             if existing:
-                print("already exists")
                 continue
             allowed_fields = set( StudentInDB.__fields__.keys())
             filtered_data = {k: v for k, v in row.items() if k in allowed_fields}
             student = StudentInDB(**filtered_data)
-            print(filtered_data)
             session.add(student)
         except Exception as e:
                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
@@ -44,5 +43,17 @@ def create_student_file(session:Session, buffer:BytesIO):
     
     return{"success":True}
 
-            
+def update_student(session:Session, student:StudentUpdate )->dict:
+    existing=session.exec(select(StudentInDB).where(StudentInDB.usn==student.usn)).first()
+    print(student)
+    if (not existing):
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="student does not exist")
+    for key, value in student.model_dump(exclude_unset=True).items():
+        setattr(existing, key, value)
+    
+    session.add(existing)
+    session.commit()
+    session.refresh(existing)
+    return{"success":True}
+        
             

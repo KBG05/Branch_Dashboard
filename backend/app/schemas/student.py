@@ -31,3 +31,14 @@ class StudentList(SQLModel):
 
 class StudentResponseMessage(SQLModel):
     msg:str
+    
+class StudentUpdate(BaseModel):
+    usn:Optional[str]=Field(default=None)
+    name:Optional[str]=Field(default=None)
+    gender:Optional[str]=Field(max_length=1, default=None)
+    doa:Optional[datetime]=None
+    seat_type:Optional[str]=Field(default=None)
+    ranking:Optional[str]=None
+    batch:Optional[int]=Field(default=None)
+    branch:Optional[str]=Field(default=None)
+    state:Optional[str]=Field(default=None)

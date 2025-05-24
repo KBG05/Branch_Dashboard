@@ -6,7 +6,7 @@ from  uuid import uuid4, UUID
 
 class StudentInDB(SQLModel, table=True):
     __tablename__ = "student"
-
+ 
     id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
     usn: str = Field(default=None, nullable=False, index=True, unique=True)
     name: str

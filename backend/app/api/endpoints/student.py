@@ -1,23 +1,26 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Body, Path, File, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, status, Body, Path, File, UploadFile, Form
 from sqlmodel import Session, select
 from app.db.session import get_session
 from app.models.student  import StudentInDB
-from app.schemas.student import StudentRead, StudentFullRead, StudentList, StudentResponseMessage
+from app.schemas.student import StudentRead, StudentFullRead, StudentList, StudentResponseMessage, StudentUpdate
 from typing import Annotated
 from pydantic import ValidationError
-from app.crud.student import get_student_all, get_student_by_usn, create_student, create_student_file
+from app.crud.student import get_student_all, get_student_by_usn, create_student, create_student_file,  update_student
 from sqlalchemy.exc import DataError
 from io import BytesIO
 
 
-router=APIRouter(prefix="/student")
+router=APIRouter(prefix="/student",tags=["Student Management"])
 
 @router.get("/", response_model=StudentList, status_code=status.HTTP_200_OK)
-def read_students(session:Session=Depends(get_session)):
-    # GET /student/
-    # Fetches the list of all students from the database.
-    # Returns minimal data (as defined in StudentRead) for each student.
-    # Useful for displaying a table or list of students on the frontend.
+def read_students(session:Session=Depends(get_session), ):
+    """
+     GET /student/\n
+     Fetches the list of all students from the database.\n
+     Returns minimal data (as defined in StudentRead) for each student.\n
+     Useful for displaying a table or list of students on the frontend.\n
+     """
+
 
     data=get_student_all(session)
     
@@ -44,10 +47,12 @@ def read_student(usn:Annotated[str, Path()], session:Session=Depends(get_session
 
 @router.post("/", response_model=StudentResponseMessage, status_code=status.HTTP_201_CREATED)
 def add_student(student:Annotated[StudentInDB, Body(embed=True)], session:Session=Depends(get_session)):
-    # POST /student/
-    # Accepts a student object in the request body and creates a new student in the database.
-    # Validates that a student with the same USN does not already exist.
-    # Returns the created student data (as defined in StudentResponse).
+    """
+    POST /student/\n
+    Accepts a student object in the request body and creates a new student in the database.\n
+    Validates that a student with the same USN does not already exist.\n
+    Returns the created student data (as defined in StudentResponse).\n
+    """
 
     try:
         response_data=create_student(student=student, session=session)
@@ -73,3 +78,14 @@ async def add_students_csv(file:UploadFile=File(...), session:Session=Depends(ge
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)+"1")
     
     return {"msg":"excel data successfuly added"}
+
+
+@router.patch("/update", response_model=StudentResponseMessage)
+def update_student_data(student:Annotated[StudentUpdate, Form()], session:Session=Depends(get_session) ):
+    try:
+        response_data=update_student(session=session, student=student)
+        if not response_data["success"]:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="couldnt update data")
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,  detail=str(e)+"1")
+    return{"msg":"student data updated successfully"}
