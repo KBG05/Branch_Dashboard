@@ -27,7 +27,6 @@ def create_student(session:Session, student:StudentInDB):
 
 def create_student_file(session:Session, buffer:BytesIO)->dict:
     dict_data=extract_students_data(buffer=buffer)
-    added=""
     for row in dict_data:
         try:
             existing=session.exec(select(StudentInDB).where(StudentInDB.usn==row["usn"])).first()
