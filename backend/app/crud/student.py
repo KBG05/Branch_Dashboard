@@ -1,8 +1,8 @@
 from typing import List, Optional
 from app.models.student  import StudentInDB
 from app.db.session import Session
-from sqlmodel import select,delete
-from pydantic import ValidationError
+from sqlmodel import select
+
 from fastapi import HTTPException, status
 from app.scripts.scripts import extract_students_data
 from io import BytesIO

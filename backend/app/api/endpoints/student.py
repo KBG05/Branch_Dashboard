@@ -1,10 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Body, Path, File, UploadFile, Form
-from sqlmodel import Session, select
+from sqlmodel import Session
 from app.db.session import get_session
 from app.models.student  import StudentInDB
 from app.schemas.student import StudentRead, StudentFullRead, StudentList, StudentResponseMessage, StudentUpdate
 from typing import Annotated
-from pydantic import ValidationError
 from app.crud.student import get_student_all, get_student_by_usn, create_student, create_student_file,  update_student
 from sqlalchemy.exc import DataError
 from io import BytesIO
