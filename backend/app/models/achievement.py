@@ -1,6 +1,5 @@
 from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional
-from datetime import datetime, timezone
 from  uuid import uuid4, UUID
 
 class AchievementInDB(SQLModel, table=True):

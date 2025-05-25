@@ -3,7 +3,7 @@ from sqlmodel import Session
 from app.db.session import get_session
 from app.models.student  import StudentInDB
 from app.schemas.student import StudentRead, StudentFullRead, StudentList, StudentResponseMessage, StudentUpdate
-from typing import Annotated
+from typing import Annotated, List
 from app.crud.student import get_student_all, get_student_by_usn, create_student, create_student_file,  update_student
 from sqlalchemy.exc import DataError
 from io import BytesIO
@@ -21,11 +21,10 @@ def read_students(session:Session=Depends(get_session), ):
      """
 
 
-    data=get_student_all(session)
+    data:List[StudentInDB]=get_student_all(session)
     
     if not data:
          raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No students exist")
-
     response_data=[StudentRead.model_validate(s.model_dump()) for s in data]
     return StudentList(data=response_data, count=len(response_data))
 
