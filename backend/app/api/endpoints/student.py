@@ -1,15 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Body, Path, File, UploadFile, Form
 from sqlmodel import Session
 from app.db.session import get_session
-from app.models.student  import StudentInDB
+from app.models.model import StudentInDB
 from app.schemas.student import StudentRead, StudentFullRead, StudentList, StudentResponseMessage, StudentUpdate
 from typing import Annotated, List
 from app.crud.student import get_student_all, get_student_by_usn, create_student, create_student_file,  update_student
 from sqlalchemy.exc import DataError
 from io import BytesIO
+from app.api.dependency import get_current_user
 
-
-router=APIRouter(prefix="/student",tags=["Student Management"])
+router=APIRouter(prefix="/student",tags=["Student Management"], dependencies=[Depends(get_current_user)])
 
 @router.get("/", response_model=StudentList, status_code=status.HTTP_200_OK)
 def read_students(session:Session=Depends(get_session), ):
@@ -61,10 +61,8 @@ def add_student(student:Annotated[StudentInDB, Body(embed=True)], session:Sessio
 async def add_students_csv(file:UploadFile=File(...), session:Session=Depends(get_session) ):
     if not file.filename.endswith((".csv", ".xlsx")):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="only CSV, XLSX files supported")
-    print(file.filename)
     contents=await file.read()
     buffer=BytesIO(contents)
-    print(buffer)
     try:
         response_data=create_student_file(buffer=buffer, session=session)
         if not response_data["success"]:

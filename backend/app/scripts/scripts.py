@@ -113,7 +113,7 @@ def extract_students_data(buffer: BytesIO):
 
 
 # Your existing PDF result extraction functions unchanged
-def extract_results(pdf_path: str):
+def extract_results(buffer: BytesIO):
     columns = [
         "usn", "name", "22matm21", "22phym22", "22eme23", "22esc243", "22plc25d",
         "22pws26", "22ico27", "22idt28", "sgpa"
@@ -122,7 +122,7 @@ def extract_results(pdf_path: str):
     student_data = []
 
     import pdfplumber
-    with pdfplumber.open(pdf_path) as pdf:
+    with pdfplumber.open(buffer) as pdf:
         for page in pdf.pages:
             text = page.extract_text()
             if not text:
@@ -142,8 +142,8 @@ def extract_results(pdf_path: str):
     return df
 
 
-def wide_to_long_to_db(pdf_path: str, db_file: str):
-    df = extract_results(pdf_path)
+def wide_to_long_to_db(buffer:BytesIO):
+    df = extract_results(buffer)
     subject_columns = df.columns[2:-1]  # Exclude usn, name, sgpa
     df_long = df.melt(
         id_vars=["usn", "name"],
@@ -153,4 +153,43 @@ def wide_to_long_to_db(pdf_path: str, db_file: str):
     )
     sgpa_df = df[["usn", "sgpa"]].drop_duplicates()
     df_long = df_long.merge(sgpa_df, on="usn", how="left")
-    return df_long
+    return df_long.to_dict(orient="records")
+
+
+
+
+
+def extract_achievements_data(buffer:BytesIO):
+    try:
+        df = pd.read_excel(buffer, engine="openpyxl")
+
+        columns_mapping = {
+            "USN": "usn",
+            "Title": "title",
+            "Description": "description",
+            "Achievement Type": "achievement_type",
+            "Achievement Date": "achievement_date",
+            "Certificate URL": "certificated_url"
+        }
+
+        # Rename columns
+        df.rename(columns={k: v for k, v in columns_mapping.items() if k in df.columns}, inplace=True)
+
+        # Drop rows missing required fields
+        df = df.dropna(subset=["usn", "title"])
+
+        # Convert NaNs to None
+        df = df.where(pd.notnull(df), None)
+
+        # Ensure all expected columns exist
+        expected_columns = ["usn", "title", "description", "achievement_type", "achievement_date", "certificated_url"]
+        for col in expected_columns:
+            if col not in df.columns:
+                df[col] = None
+        df = df[expected_columns]
+
+        return df.to_dict(orient="records")
+
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+

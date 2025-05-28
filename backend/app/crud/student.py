@@ -1,5 +1,5 @@
 from typing import List, Optional
-from app.models.student  import StudentInDB
+from app.models.model  import StudentInDB
 from app.db.session import Session
 from sqlmodel import select
 from fastapi import HTTPException, status

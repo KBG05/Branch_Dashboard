@@ -47,5 +47,13 @@ class ResultInDB(SQLModel, table=True):
     subject:str
     grade:str=Field(max_length=3)
     sgpa:Optional[float]=None
-    backlog:int=Field()
     created_at:Optional[datetime]=Field(default_factory=lambda:datetime.now(timezone.utc))
+    
+
+class UserInDB(SQLModel, table=True):
+    __tablename__="user"
+    id:Optional[UUID]=Field(default_factory=uuid4, primary_key=True)
+    username:str=Field( nullable=False, unique=True, index=True)
+    hashed_password:str=Field(nullable=False)
+
+    
