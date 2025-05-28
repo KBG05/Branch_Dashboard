@@ -261,7 +261,7 @@ const StudentProfile = () => {
 
       {/* Analytics Dashboard */}
       <Card>
-        <CardHeader>
+        <CardHeader>  
           <CardTitle>Performance Analytics</CardTitle>
           <CardDescription>
             Interactive dashboard showing {student.name}'s performance metrics and comparison with peers.
@@ -291,7 +291,7 @@ interface AchievementsListProps {
   achievements: Array<{
     id: string;
     title: string;
-    category: "academic" | "internship" | "competition" | "extracurricular";
+    category?: "academic" | "internship" | "competition" | "extracurricular";
     date: string;
   }>;
 }

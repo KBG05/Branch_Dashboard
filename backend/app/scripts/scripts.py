@@ -18,7 +18,6 @@ state_iso_codes = {
 def extract_students_data(buffer: BytesIO):
     try:
         df = pd.read_excel(buffer, engine='openpyxl')
-
         columns_mapping = {
             "Name": "name",
             "Date of Birth": "dob",
