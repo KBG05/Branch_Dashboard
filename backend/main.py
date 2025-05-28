@@ -8,13 +8,7 @@ from app.models.result import ResultInDB
 from app.api.endpoints import student
 
 
-from contextlib import asynccontextmanager
-@asynccontextmanager
-async def lifespan(app:FastAPI):
-    SQLModel.metadata.create_all(engine)
-    yield
-
-app=FastAPI(lifespan=lifespan)
+app=FastAPI()
 
 app.include_router(student.router)
 app.add_middleware(CORSMiddleware,

@@ -3,4 +3,6 @@
 .vscode/
 .env
 docker-compose.yml
-College Branch Website Implementation Guide.pdf
+College Branch Website Implementation Guide.
+./alembic/
+./alembic/versions
