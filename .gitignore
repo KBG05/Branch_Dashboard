@@ -1,3 +1,5 @@
 .venv
 /frontendsample
 .vscode/
+.env
+docker-compose.yml
