@@ -11,7 +11,7 @@ class AchievementInDB(SQLModel, table=True):
     achievement_type:Optional[str]=None
     achievement_date:Optional[str]=None
     certificated_url:Optional[str]=None
-    
+
 
 
 
